@@ -16,8 +16,32 @@
             <th>Read</th>
         </thead>
         <tbody>
-
         </tbody>
     </table>
+
+    <button class="openFormButton" onClick="openForm()">Add Book</button>
+
+    <div id="formContainer">
+        <form action="" id="bookForm">
+            <label for="title"><b>Title</b></label>
+            <input type="text" placeholder="Enter Title" name="title" id="formTitle" required>
+
+            <label for="author"><b>Author</b></label>
+            <input type="text" placeholder="Enter Author" name="author" id="formAuthor" required>
+
+            <label for="pages"><b>Pages</b></label>
+            <input type="number" placeholder="Enter # of Pages" name="pages" id="formPages" required>
+
+            <p><b>Did you read this book?</b></p>
+            <input type="radio" id="yes" name="readStatus" value="true">
+            <label for="yes"><b>Yes</b></label>
+            <input type="radio" id="no" name="readStatus" value="false" checked>
+            <label for="no"><b>No</b></label>
+            <br>
+            <button type="submit" class="formButton">Submit</button>
+            <button type="close" class="closeButton" onClick="closeForm()">Close</button>
+        </form>
+    </div>
+    
 </body>
 </html>
