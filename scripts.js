@@ -1,28 +1,60 @@
 class Library {
     constructor () {
         this.bookData = [];
-        this.addBookToLibrary = function(book) {
-            this.bookData.push(book);
-            addBookDataHTML(book);
-        }
+        this.total = 0;
         this.info = function() {
             return this.bookData;
+        }
+        this.addBookToLibrary = function(book) {
+            if (this.getBookIndex(book) != -1) {
+                alert("Book already exists in database.");
+                return
+            }
+            this.bookData.push(book);
+            this.total++;
+            addBookDataHTML(book, this.bookData, this.total, this.toggleStatus, this.getBookIndex);
+        }
+        this.toggleStatus = (book) => {
+            // updates status in array and then returns the new status as string for use in addToggle
+            let changedStatus = "";
+            let bookIndex = this.getBookIndex(book);
+            if (bookIndex == -1 ) {
+                return;
+            }
+            if (this.bookData[bookIndex].read == "No") {
+                changedStatus = "Yes";
+            } else {
+                changedStatus = "No";
+            }
+            this.bookData[bookIndex].read = changedStatus;
+            return changedStatus;
+        }
+        this.getBookIndex = (book) => {
+            for (let i = 0; i < this.bookData.length; i++) {
+                if (this.bookData[i].title == book.title 
+                    && this.bookData[i].author == book.author
+                    && this.bookData[i].pages == book.pages) {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 }
 
-function Book(title, author, pages, read) {
-    this.title = title;
-    this.author = author; 
-    this.pages = pages;
-    this.read = "No";
+class Book {
+    constructor(title, author, pages, read) {
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        this.read = "No";
+        if (read == true) {
+            this.read = "Yes";
+        }
 
-    if (read == true) {
-        this.read = "Yes"
-    } 
-
-    this.info = function() {
-        return [this.title, this.author, this.pages, this.read];
+        this.info = function () {
+            return [this.title, this.author, this.pages, this.read];
+        };
     }
 }
 
@@ -32,19 +64,45 @@ function getBodyHTML() {
     return libraryBody;
 }
 
-function addRowHTML(libraryBody) {
+function addRowHTML(libraryBody, title, total) {
     let newRow = libraryBody.insertRow(-1);
+    newRow.id = [title, total].join("");
     return newRow;
 }
 
-function addBookDataHTML(book) {
-    let newRow = addRowHTML(getBodyHTML());
-    
+function addToggle(row, rowid, book, toggleFunc) {
+    let newCell = row.insertCell();
+    let newToggle = document.createElement("button");
+    newToggle.innerHTML = "Toggle Read";
+    newToggle.addEventListener("click", ()=> {
+        let change = "" + toggleFunc(book);
+        let toggleRow = document.querySelector(`#${rowid} :nth-child(4)`);
+        toggleRow.innerHTML = change;
+    });
+    newCell.appendChild(newToggle);
+}
+
+function addRemove(row, rowid, book, libraryData, searchFunc) {
+    let newCell = row.insertCell();
+    let newRemove = document.createElement("button");
+    newRemove.innerHTML = "Remove";
+    newRemove.addEventListener("click", () => {
+        let bookIndex = searchFunc(book);
+        libraryData.splice(bookIndex, 1);
+        document.getElementById(rowid).remove();
+    })
+    newCell.appendChild(newRemove);
+}
+
+function addBookDataHTML(book, libraryData, libraryTotal, toggleFunction, searchFunction) {
+    let newRow = addRowHTML(getBodyHTML(), book.title, libraryTotal);
     for (let i = 0; i < 4; i++) {
         let newCell = newRow.insertCell();
         let newText = document.createTextNode(book.info()[i]);
         newCell.appendChild(newText);
     }
+    addToggle(newRow, newRow.id, book, toggleFunction); 
+    addRemove(newRow, newRow.id, book, libraryData, searchFunction);
 }
 
 function openForm() {
@@ -59,12 +117,11 @@ let myLibrary = new Library();
 
 let papan = new Book("papan", "natsuko", 250, true);
 let sixteen = new Book("ff16", "yoship", 420, false);
-let snowdrops = new Book("A. D. Miller", "Snowdrops", 272, false);
+let snowdrops = new Book("Snowdrops", "A. D. Miller", 272, false);
 
 myLibrary.addBookToLibrary(papan);
 myLibrary.addBookToLibrary(sixteen);
 myLibrary.addBookToLibrary(snowdrops);
-
 
 let bookForm = document.getElementById("bookForm");
 bookForm.addEventListener("submit", (e) => {
@@ -80,18 +137,6 @@ bookForm.addEventListener("submit", (e) => {
 
     let addBook = new Book(newTitle, newAuthor, newPages, newRead);
     myLibrary.addBookToLibrary(addBook);
-
-    // let title = document.getElementById("formTitle");
-    // let author = document.getElementById("formAuthor");
-    // let pages = document.getElementById("formPages");
-    // let readRadio = document.getElementsByName("readStatus");
-    // let readStatus = false; 
-
-    // if (readRadio[0] == "true") {
-    //     readStatus = true;
-    // } 
-
-    // console.log([title, author, pages, readStatus].join(""));
 })
 
 
